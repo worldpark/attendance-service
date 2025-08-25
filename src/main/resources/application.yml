@@ -1,0 +1,37 @@
+server:
+  port: 0
+
+spring:
+  kafka:
+    bootstrap-servers:
+      - ${KAFKA_1_SERVER}
+      - ${KAFKA_2_SERVER}
+    consumer:
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      auto-offset-reset: earliest
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+
+  datasource:
+    driver-class-name: org.mariadb.jdbc.Driver
+    username: ${SPRING_USERCHECK_DATASOURCE_USERNAME}
+    password: ${SPRING_USERCHECK_DATASOURCE_PASSWORD}
+    url: ${SPRING_USERCHECK_DATASOURCE_URL}
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        show_sql: true
+        dialect: org.hibernate.dialect.MariaDBDialect
+        format_sql: true
+        default_batch_fetch_size: 100
+    generate-ddl: true
+    defer-datasource-initialization: true
+    open-in-view: false
+
+  jwt:
+    secret: ${SPRING_USERCHECK_JWT_KEY}
