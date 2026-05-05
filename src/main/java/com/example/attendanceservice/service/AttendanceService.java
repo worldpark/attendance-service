@@ -24,18 +24,15 @@ public class AttendanceService {
             leaseTime = 10L
     )
     public void saveAttendance(AttendanceCheckEvent attendanceCheckEvent) {
-        User user = User.builder()
-                .userId(attendanceCheckEvent.getUserId())
-                .build();
+        Attendance attendance = attendanceRepository.findByUser_UserIdAndAttendanceDate(
+                        attendanceCheckEvent.getUserId(),
+                        attendanceCheckEvent.getAttendanceDate()
+                )
+                .orElseGet(() -> createAttendance(attendanceCheckEvent));
 
-        Attendance attendance = Attendance.builder()
-                .attendanceId(attendanceCheckEvent.getAttendanceId())
-                .attendanceDate(attendanceCheckEvent.getAttendanceDate())
-                .checkTime(attendanceCheckEvent.getCheckTime())
-                .status(attendanceCheckEvent.getStatus())
-                .memo(attendanceCheckEvent.getMemo())
-                .user(user)
-                .build();
+        attendance.changeAttendanceDate(attendanceCheckEvent.getAttendanceDate());
+        attendance.changeCheckTime(attendanceCheckEvent.getCheckTime());
+        attendance.changeMemo(attendanceCheckEvent.getMemo());
 
         if (attendanceCheckEvent.getCheckTime().isBefore(attendance.getAttendanceDate())) {
             attendance.changeStatus(AttendanceStatus.PRESENT);
@@ -44,5 +41,20 @@ public class AttendanceService {
         }
 
         attendanceRepository.save(attendance);
+    }
+
+    private Attendance createAttendance(AttendanceCheckEvent attendanceCheckEvent) {
+        User user = User.builder()
+                .userId(attendanceCheckEvent.getUserId())
+                .build();
+
+        return Attendance.builder()
+                .attendanceId(attendanceCheckEvent.getAttendanceId())
+                .attendanceDate(attendanceCheckEvent.getAttendanceDate())
+                .checkTime(attendanceCheckEvent.getCheckTime())
+                .status(attendanceCheckEvent.getStatus())
+                .memo(attendanceCheckEvent.getMemo())
+                .user(user)
+                .build();
     }
 }

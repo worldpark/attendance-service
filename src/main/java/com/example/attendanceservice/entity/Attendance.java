@@ -30,6 +30,9 @@ public class Attendance {
     @Id
     private UUID attendanceId;
 
+    @Version
+    private Long version;
+
     @NotNull
     private LocalDateTime attendanceDate;
     private LocalDateTime checkTime;
@@ -63,6 +66,10 @@ public class Attendance {
 
     public void changeAttendanceDate(LocalDateTime attendanceDate){
         this.attendanceDate = attendanceDate;
+    }
+
+    public void changeMemo(String memo) {
+        this.memo = memo;
     }
 
     public String readAttendanceStatus(){
