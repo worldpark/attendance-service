@@ -33,9 +33,17 @@ public class AttendanceCheckEvent {
             objectMapper.registerModule(new JavaTimeModule());
 
             JsonNode root = objectMapper.readTree(json);
-            String payloadStr = root.get("payload").asText();
+            JsonNode payload = root.get("payload");
 
-            return objectMapper.readValue(payloadStr, AttendanceCheckEvent.class);
+            if (payload == null || payload.isNull()) {
+                throw new IllegalArgumentException("payload is required");
+            }
+
+            if (payload.isTextual()) {
+                return objectMapper.readValue(payload.asText(), AttendanceCheckEvent.class);
+            }
+
+            return objectMapper.treeToValue(payload, AttendanceCheckEvent.class);
         }catch (JsonProcessingException exception){
             throw new RuntimeException(exception);
         }

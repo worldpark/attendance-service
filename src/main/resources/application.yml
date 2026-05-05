@@ -4,8 +4,8 @@ server:
 spring:
   kafka:
     bootstrap-servers:
-      - ${KAFKA_1_SERVER}
-      - ${KAFKA_2_SERVER}
+      - ${KAFKA_1_SERVER:localhost:9092}
+      - ${KAFKA_2_SERVER:localhost:9093}
     consumer:
       key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
       value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
@@ -16,9 +16,9 @@ spring:
 
   datasource:
     driver-class-name: org.mariadb.jdbc.Driver
-    username: ${SPRING_USERCHECK_DATASOURCE_USERNAME}
-    password: ${SPRING_USERCHECK_DATASOURCE_PASSWORD}
-    url: ${SPRING_USERCHECK_DATASOURCE_URL}
+    username: ${SPRING_USERCHECK_DATASOURCE_USERNAME:root}
+    password: ${SPRING_USERCHECK_DATASOURCE_PASSWORD:gkwlak98}
+    url: ${SPRING_USERCHECK_DATASOURCE_URL:jdbc:mariadb://localhost:3307/user_check?rewriteBatchedStatements=true}
 
   jpa:
     hibernate:
@@ -33,5 +33,13 @@ spring:
     defer-datasource-initialization: true
     open-in-view: false
 
+
+  cache:
+    type: redis
+  data:
+    redis:
+      host: ${SPRING_CACHE_DB_HOST:localhost}
+      port: ${SPRING_CACHE_DB_PORT:6379}
+
   jwt:
-    secret: ${SPRING_USERCHECK_JWT_KEY}
+    secret: ${SPRING_USERCHECK_JWT_KEY:sOX6rwX65uDe+JphKfE9SAbC9oR3n61BN84t9zkN9QI=}

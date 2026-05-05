@@ -1,5 +1,6 @@
 HELP.md
 .gradle
+.gradle-codex/
 build/
 !gradle/wrapper/gradle-wrapper.jar
 !**/src/main/**/build/
@@ -25,6 +26,18 @@ bin/
 out/
 !**/src/main/**/out/
 !**/src/test/**/out/
+
+### Logs ###
+*.log
+
+### Environment ###
+.env
+.env.*
+!.env.example
+
+### OS ###
+.DS_Store
+Thumbs.db
 
 ### NetBeans ###
 /nbproject/private/

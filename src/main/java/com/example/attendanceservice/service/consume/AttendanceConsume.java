@@ -2,10 +2,8 @@ package com.example.attendanceservice.service.consume;
 
 import com.example.attendanceservice.dto.AttendanceCheckEvent;
 import com.example.attendanceservice.dto.MessageDedupInsertDto;
-import com.example.attendanceservice.entity.Attendance;
-import com.example.attendanceservice.entity.User;
-import com.example.attendanceservice.repository.AttendanceRepository;
 import com.example.attendanceservice.security.JwtSecurity;
+import com.example.attendanceservice.service.AttendanceService;
 import com.example.attendanceservice.service.MessageDedupService;
 import com.example.attendanceservice.util.UUIDv6Generator;
 import lombok.RequiredArgsConstructor;
@@ -22,7 +20,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class AttendanceConsume {
 
-    private final AttendanceRepository attendanceRepository;
+    private final AttendanceService attendanceService;
     private final MessageDedupService messageDedupService;
     private final JwtSecurity jwtSecurity;
 
@@ -47,41 +45,28 @@ public class AttendanceConsume {
         try {
             AttendanceCheckEvent attendanceCheckEvent = AttendanceCheckEvent.fromJson(message);
 
-            if(jwtSecurity.checkingJwt(jwt)){
+//            if(jwtSecurity.checkingJwt(jwt)){
+//            }
 
-                MessageDedupInsertDto messageDedupInsertDto = MessageDedupInsertDto.builder()
-                        .messageId(UUIDv6Generator.generate())
-                        .eventId(uuEventId)
-                        .consumerGroup("attendance-service")
-                        .topic(record.topic())
-                        .partitionNo(record.partition())
-                        .offsetNo(record.offset())
-                        .message(message)
-                        .producerApp("attendance-service")
-                        .build();
+            MessageDedupInsertDto messageDedupInsertDto = MessageDedupInsertDto.builder()
+                    .messageId(UUIDv6Generator.generate())
+                    .eventId(uuEventId)
+                    .consumerGroup("attendance-service")
+                    .topic(record.topic())
+                    .partitionNo(record.partition())
+                    .offsetNo(record.offset())
+                    .message(message)
+                    .producerApp("attendance-service")
+                    .build();
 
-                boolean duplicateCheck = messageDedupService.duplicateCheck(messageDedupInsertDto);
+            boolean duplicateCheck = messageDedupService.duplicateCheck(messageDedupInsertDto);
 
-                if(!duplicateCheck){
-                    return;
-                }
-
-                User user = User.builder()
-                        .userId(attendanceCheckEvent.getUserId())
-                        .build();
-
-                Attendance attendance = Attendance.builder()
-                        .attendanceId(attendanceCheckEvent.getAttendanceId())
-                        .attendanceDate(attendanceCheckEvent.getAttendanceDate())
-                        .checkTime(attendanceCheckEvent.getCheckTime())
-                        .status(attendanceCheckEvent.getStatus())
-                        .memo(attendanceCheckEvent.getMemo())
-                        .user(user)
-                        .build();
-
-                attendanceRepository.save(attendance);
-                messageDedupService.markProcessed(messageDedupInsertDto);
+            if(!duplicateCheck){
+                return;
             }
+
+            attendanceService.saveAttendance(attendanceCheckEvent);
+            messageDedupService.markProcessed(messageDedupInsertDto);
         }catch (Exception exception){
             messageDedupService.markFailed(uuEventId, "attendance-service", exception);
             throw exception;
